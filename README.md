@@ -14,6 +14,10 @@ All that is needed to "install" is to copy the main.py and LIS_display.py files 
 
 To use the system all you need to do is power the Pico device on. As the controller file is named main.py, it should start automatically. To avoid it from running at power on, rename the file to something else, e.g., LIS_driver.py.
 
+## Additional Libraries
+
+The ![micropython_ssd1306](https://github.com/stlehmann/micropython-ssd1306) is used to communicate with the OLED display. In Thonny with the Pico device plugged into a computer, click Tools > Manage Packages... search for micropython_ssd1306 and install it to the device.
+
 ## Future
 
 Once the system is stable, it would be cool to rewrite the entire thing in C using the Pico SDK. Could be used to compared language complexity, efficiency, battery life comparison, etc.
