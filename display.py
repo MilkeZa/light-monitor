@@ -5,7 +5,7 @@ Description: This file manages the creation of and updating of the display and o
     on the SSD1306 OLED display. It accepts data from the main module and displays it on screen.
 
 Created on: 11-DEC-2023
-Updated on: 12-DEC-2023
+Updated on: 15-DEC-2023
 """
 
 
@@ -31,13 +31,16 @@ class Display:
         self.raw_delta_base_text    = "R delta = "
         self.perc_delta_base_text   = "% delta = "
         self.is_valid_base_text     = "Valid = "
+        self.temp_base_text         = "Temp. F = "
+        self.humidity_base_text     = "Humidity = "
 
         # Update the text shown on the screen.
         self.update()
 
     def update(self, val1: int = -1, val2: int  = -1, avg: float  = -1.0,
                        raw_delta: int = -1, perc_delta: float = -1.0,
-                       is_valid: bool = False) -> None:
+                       is_valid: bool = False,
+                       temp_f: float = -1.0, rel_hum: float = -1.0) -> None:
         """ Refreshes the display, setting the available text. 
         
         Params
@@ -48,6 +51,8 @@ class Display:
         raw_delta [int, optional] Absolute value of the difference between the two values.
         perc_delta [float, optional] Difference between the LDR values as a percentage.
         is_valid [bool, optional] Indicates whether the perc_delta is within an acceptable range.
+        temp_f [float, optional] Temperature in degrees fahrenheit.
+        rel_hum [float, optional] Relative humidity as a percentage out of 100.
         """
 
         # Fill the screen with black pixels and set the display text. Lastly, call the show method.
@@ -59,6 +64,8 @@ class Display:
         self.display.text(f"{self.raw_delta_base_text}{raw_delta}", 0, 24)
         self.display.text(f"{self.perc_delta_base_text}{perc_delta}", 0, 32)
         self.display.text(f"{self.is_valid_base_text}{is_valid}", 0, 40)
+        self.display.text(f"{self.temp_base_text}{temp_f}", 0, 48)
+        self.display.text(f"{self.humidity_base_text}{rel_hum}%", 0, 56)
 
         self.display.show()
 
@@ -68,7 +75,7 @@ def main():
 
     # Create a test display and attempt to update it with fake data.
     display = Display()
-    display.update(00000, 00000, 0.0, 0, 0.0, False)
+    display.update(00000, 00000, 0.0, 0, 0.0, False, 0.0, 0.0)
 
 
 if __name__ == "__main__":

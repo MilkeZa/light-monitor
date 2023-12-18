@@ -12,6 +12,7 @@ Updated on: 12-DEC-2023
 
 
 from machine import Pin, ADC
+from dht import DHT11
 from utime import sleep_ms
 from sys import exit
 from _thread import start_new_thread
@@ -163,17 +164,22 @@ def core0_thread(reading_delay_ms: int, max_perc_delta: float, verbose_output: b
     """
 
     try:
-        # Setup the display and ADC pins needed to run the LDR sensors.
+        # Setup the display, ADC pins needed to run the LDR sensors, and the DHT11 sensor.
         display = Display()
         ldr1, ldr2 = ADC(26), ADC(27)
+        dht = DHT11(Pin(12))
     except ValueError:  # LDR was likely plugged into an invalid ADC pin.
-        print("ValueError - Verify that each LDR is connected to a valid ADC pin " \
-              "(GP26, GP27, GP28).")
+        print("Unable to setup display/sensors.")
 
     # Loop until device loses power.
     while True:
-        # Get the list of LDR readings from the sensors.
+        # Get the list of LDR and temperature/humidity readings from the sensors.
         val1, val2 = read_ldr_vals(ldr1, ldr2)
+        dht.measure()
+        temp, rel_hum = dht.temperature(), dht.humidity()
+
+        # Temperature value needs to be converted to fahrenheit.
+        temp_f = round((temp * 9.0 / 5.0) + 32.0, 2)
 
         # Calculate the average, raw delta, and percent delta values for the readings and check
         # the data's validity.
@@ -189,7 +195,7 @@ def core0_thread(reading_delay_ms: int, max_perc_delta: float, verbose_output: b
         # Alert the second thread that the reading indicator needs to be lit. Then, update the
         # display and sleep until the next reading.
         RunCoreFlag.set_run_flag()
-        display.update(val1, val2, avg_val, delta, perc_delta, is_valid)
+        display.update(val1, val2, avg_val, delta, perc_delta, is_valid, temp_f, rel_hum)
         sleep_ms(reading_delay_ms)
 
 
@@ -227,7 +233,7 @@ def core1_thread():
 def main():
     """ Main entrypoint of the file. """
 
-    # Adjust the delay between readings and indicator LED ontime (both in ms).
+    # Adjust the delay between readings and indicator LED ontime (both in ms). Don't go below 1000.
     reading_delay_ms = 15000
 
     global indicator_ontime_ms
